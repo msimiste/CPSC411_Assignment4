@@ -35,7 +35,7 @@ type ST = [SYM_TABLE]
 {-
 insert :: Int -> ST -> SYM_DESC -> (Int,ST)
 insert n [] d =  error "Symbol table error: insertion before defining scope."
-insert n ((Symbol_table(nL,nA,sL)):rest) (ARGUMENT(str,t,dim)) 
+insert n ((Symbol_table(nL,nA,sL)):rest)(ARGUMENT(str,t,dim)) 
 	   | (in_index_list str sL) = error ("Symbol table error: " ++ str ++"is already defined.")
 	   | otherwise = (n,Symbol_table(nL,nA+1,(str,Var_attr(~(nA+4),T,dim))::sL))
 insert n ((Symbol_table(nL,nA,sL)):rest) (VARIABLE (str,T,dim)) 
@@ -78,5 +78,5 @@ newscope s = (Symbol_table(0,0,[])):s
 removeScope :: ScopeType -> ST -> ST
 
  
-return:: ST -> M_type
+return :: ST -> M_type
 -}
