@@ -14,7 +14,7 @@ data SYM_DESC = ARGUMENT (String,M_type,Int)
 data SYM_I_DESC = I_VARIABLE (Int,Int,M_type,Int)
 			  | I_FUNCTION (Int,String,[(M_type,Int)],M_type)
 			  | I_CONSTRUCTOR (Int,[M_type],String)
-			  | I_TYPE [String];
+			  | I_TYPE [String]
 			  
 data ScopeType = L_PROG 
               | L_FUN M_type 
@@ -26,6 +26,7 @@ data SYM_VALUE = Var_attr (Int,M_type,Int)
               | Fun_attr (String,[(M_type,Int)],M_type)
               | Con_attr (Int, [M_type], String)
               | Typ_attr [String]
+                
 
 
 data SYM_TABLE = Symbol_table (ScopeType,Int,Int,[(String,SYM_VALUE)])

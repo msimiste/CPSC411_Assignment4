@@ -4,6 +4,7 @@ import LexAssign
 import ParAssign
 import ErrM
 import SkelAssign
+import SymbolTable
 import Text.Show.Pretty
 
 import System.Environment

@@ -37,53 +37,31 @@ in_index_list str ((x,_):xs)| str==x = True
  
  
     
-lookup: ST -> String -> SYM_I_DESC
+look_up :: ST -> String -> SYM_I_DESC
 look_up s x = find 0 s where
+    found level (Var_attr(offset,t,dim)) =  I_VARIABLE(level,offset,t,dim)
+    found level (Fun_attr(label,arg_Type,t)) = I_FUNCTION(level,label,arg_Type,t)
+    found level (Con_attr (cnum, t, name)) = I_CONSTRUCTOR (cnum,t,name)
+    found level (Typ_attr s) = I_TYPE s
+    --found :: Int -> SYM_VALUE -> bool
+    find n [] = error ("Could not find ")
+    find n (Symbol_table(_,_,_,vs):rest) = 
+         (case find_level x vs of 
+            Just v -> found n v
+            Nothing -> find (n+1) rest)
+            
+find_level :: String -> [(String,SYM_VALUE)] -> Maybe SYM_VALUE
+find_level x ((str,v):rest)
+    |x == str = Just v
+    |otherwise = find_level x rest 
+find_level x [] = Nothing
 
 
-
-found level (Var_attr(offset,t,dim)) =  I_VARIABLE(level,offset,t,dim)
-found level (Fun_attr(label,arg_Type,t)) = I_FUNCTION(level,label,arg_Type,t)
-found level (Con_attr (cnum, t, name)) = I_CONSTRUCTOR (cnum,t,name)
-found level (Type_attr s) = I_TYPE s
-			  
-found :: Int -> SYM_VALUE -> bool
-
-find_level :: [(String,SYM_VALUE)] -> Just v | Nothing
-find_level ((str,v):rest)|x == str = Just v
-					   |otherwise =  find_level rest
-find_level [] = Nothing
-
-
-find :: Int -> ST -> SYM_I_DESC 
-find n [] = error ("Could not find "++ str)
-find n (Symbol_table(_,_,_,vs)::rest) = 
-	 (case find_level vs of 
-	  Just v -> found n v
-  Nothing -> find (n+1) rest)      
-
+--find :: Int -> ST -> SYM_I_DESC 
+     
 {-
 
 
-
-lookup: ST -> String -> SYM_I_DESC
-look_up s x = find 0 s where
-found level (Var_attr(offset,type,dim)) =  I_VARIABLE(level,offset,type,dim)
-found level (Fun_attr(label,arg_Type,type)) = I_FUNCTION(level,label,arg_Type,type)
-      ...
-
-find_level ((str,v):rest)|x== str = Just v
-					   |otherwise =  find_level rest
-find_level [] = Nothing
-
-find n [] = error ("Could not find "++ str)
-find n (Symbol_table(_,_,vs)::rest) = 
-	 (case find_level vs of 
-	  Just v -> found n v
-  Nothing -> find (n+1) rest)
-
-empty:: ST
-empty = []
 
 
 new_scope :: ScopeType -> ST -> ST
