@@ -1,4 +1,4 @@
-module AST  where
+module AST where
 
 
 data M_prog = M_prog ([M_decl],[M_stmt])
@@ -48,3 +48,5 @@ data M_operation = M_fn String
             | M_floor
             | M_ceil
             deriving (Eq,Show,Ord, Read)
+
+type AST = M_prog

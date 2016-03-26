@@ -2,6 +2,7 @@
 module SymbolTable (ST,empty,new_scope,insert,lookup,return)
 where 
 import ST
+import AST
 
    
 empty :: ST 
@@ -10,11 +11,39 @@ empty = []
 new_scope:: ScopeType -> ST -> ST
 new_scope s xs = Symbol_table(s,0,0,[]):xs
 
+{-
+something :: AST -> ST
+something x = case x of
+    M_prog ([],[]) -> []
+    M_prog (dec,stm) -> buildTable (new_scope L_PROG empty) M_prog (dec,stm)
+
+
+buildTable :: ST -> AST -> ST
+buildTable s (dec stm) = processMlist 0 s dec
+
+
+processMlist :: Int -> ST -> [M_decl] -> (Int,ST)
+processMlist n s (x:xs) = (out, ts) where
+    (out1,ts1) = insert n s (convertMdec x)
+    (out,ts) = processMlist out1 ts1 xs 
+
+
+convertMdec :: M_decl -> SYM_DESC
+convertMdec x = case x of
+    M_var (str,typ,i) -> VARIABLE (str,typ,i)
+    --M_var (str,typ,i) -> ARGUMENT (str,typ,i)
+    M_fun (str,x,typ,[mdec],[mstm])-> FUNCTION (str, x ,typ)-}
+
+ 
+
+
+
+
 --inserts a value into the symbol table
 insert :: Int -> ST -> SYM_DESC -> (Int,ST)              
 insert n [] d = (n, error "Symbol table error: insertion before defining scope.")
-insert n ((Symbol_table(scT,nL,nA,sL)):rest) (ARGUMENT(str,t,dim)) 
-    | (in_index_list str sL) = error ("Symbol table error: " ++ str ++"is already defined.")   
+insert n ((Symbol_table(scT,nL,nA,sL)):rest) (ARGUMENT(str,t,dim))
+    | (in_index_list str sL) = error ("Symbol table error: " ++ str ++"is already defined.")
     | otherwise = (n,[Symbol_table(scT,nL,nA+1,(str,Var_attr(negate (nA+4),t,dim)):sL)])
 insert n ((Symbol_table(scT,nL,nA,sL)):rest) (VARIABLE (str,t,dim)) 
     | (in_index_list str sL) =  error ("Symbol table error: "++ str ++"is already defined.")
@@ -43,7 +72,7 @@ look_up s x = find 0 s where
     found level (Fun_attr(label,arg_Type,t)) = I_FUNCTION(level,label,arg_Type,t)
     found level (Con_attr (cnum, t, name)) = I_CONSTRUCTOR (cnum,t,name)
     found level (Typ_attr s) = I_TYPE s
-    --found :: Int -> SYM_VALUE -> bool
+    
     find n [] = error ("Could not find ")
     find n (Symbol_table(_,_,_,vs):rest) = 
          (case find_level x vs of 
@@ -52,8 +81,8 @@ look_up s x = find 0 s where
             
 find_level :: String -> [(String,SYM_VALUE)] -> Maybe SYM_VALUE
 find_level x ((str,v):rest)
-    |x == str = Just v
-    |otherwise = find_level x rest 
+	|x == str = Just v
+	|otherwise = find_level x rest 
 find_level x [] = Nothing
 
 
