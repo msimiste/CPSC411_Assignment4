@@ -1,5 +1,5 @@
 
-module SymbolTable (ST,empty,new_scope,insert,lookup,return)
+module SymbolTable (ST,something, empty,new_scope,insert,lookup,return)
 where 
 import ST
 import AST
@@ -8,39 +8,70 @@ import AST
 empty :: ST 
 empty = []
   
-new_scope:: ScopeType -> ST -> ST
+new_scope :: ScopeType -> ST -> ST
 new_scope s xs = Symbol_table(s,0,0,[]):xs
 
-{-
+
 something :: AST -> ST
 something x = case x of
     M_prog ([],[]) -> []
-    M_prog (dec,stm) -> buildTable (new_scope L_PROG empty) M_prog (dec,stm)
+    M_prog (dec,stm) -> snd (buildTable (new_scope L_PROG empty) (dec,stm))
 
 
-buildTable :: ST -> AST -> ST
-buildTable s (dec stm) = processMlist 0 s dec
+buildTable :: ST -> ([M_decl],[M_stmt]) -> (Int, ST)
+buildTable s (dec,stm) = (a,b) where
+			templist = (filter checkStmt stm)
+			(c,d) = processMlist 0 s dec
+			(a,b) = processStmt c d templist
+
 
 
 processMlist :: Int -> ST -> [M_decl] -> (Int,ST)
 processMlist n s (x:xs) = (out, ts) where
-    (out1,ts1) = insert n s (convertMdec x)
-    (out,ts) = processMlist out1 ts1 xs 
+    (out1,ts1) = insert n t sym where
+	    (sym,t) = convertMdec s x
+    (out,ts) = processMlist out1 ts1 xs
+processMlist n s [] = (n,s) 
 
 
-convertMdec :: M_decl -> SYM_DESC
-convertMdec x = case x of
-    M_var (str,typ,i) -> VARIABLE (str,typ,i)
-    --M_var (str,typ,i) -> ARGUMENT (str,typ,i)
-    M_fun (str,x,typ,[mdec],[mstm])-> FUNCTION (str, x ,typ)-}
+convertMdec :: ST-> M_decl -> (SYM_DESC,ST)
+convertMdec s x = case x of
+    M_var (str,typ,i) -> (VARIABLE (str,i,(length typ)),s)
+    --M_var (str,typ,i) -> (ARGUMENT (str,i,(length typ)),s)
+    M_fun (str,x,typ,mdec,mstm)-> (FUNCTION (str, map strip x ,typ), table) where 
+	    (a,table) = buildTable s (mdec, mstm)
+	    --[(s,mtyp,i)]= (map strip x)
+    _ -> (error "Some kind of error")
+    
+ {-   
+processStmt :: Int -> ST -> [M_stmt] -> (Int, ST)
+processStmt n s xs = foldl (\acc x -> processStmt1 n acc x) s xs
+--(processStmt1 n s x)++(processStmt(n s xs))
 
- 
+
+processStmt1 :: Int -> ST -> M_stmt -> (Int, ST)
+processStmt1 n s m = case m of
+    M_block(dec,stm) -> buildTable s (dec,stm)-}
+    
+   
+processStmt :: Int -> ST -> [M_stmt] -> (Int, ST)
+processStmt n s (x:xs) = (a,b) where
+    (c,d) = (processStmt1 n s x)
+    (a,b) = processStmt c d xs
+processStmt n s [] = (n,s)
 
 
 
+processStmt1 :: Int -> ST -> M_stmt -> (Int, ST)
+processStmt1 n s m = case m of
+    M_block(dec,stm) -> buildTable s (dec,stm)
+
+--takes the last 2 values in a tuple and switches their order
+strip :: (String,Int,M_type) -> (M_type,Int)
+strip (a,b,c) = (c,b)
 
 --inserts a value into the symbol table
-insert :: Int -> ST -> SYM_DESC -> (Int,ST)              
+insert :: Int -> ST -> SYM_DESC -> (Int,ST) --(number of functions, [Symbol_Table])             
 insert n [] d = (n, error "Symbol table error: insertion before defining scope.")
 insert n ((Symbol_table(scT,nL,nA,sL)):rest) (ARGUMENT(str,t,dim))
     | (in_index_list str sL) = error ("Symbol table error: " ++ str ++"is already defined.")
@@ -86,6 +117,13 @@ find_level x ((str,v):rest)
 find_level x [] = Nothing
 
 
+
+checkStmt :: M_stmt -> Bool
+checkStmt stm = case stm of
+    M_while (a,b) -> True
+    M_cond (a,b,c) -> True
+    M_block (a,b) -> True
+    _ -> False
 --find :: Int -> ST -> SYM_I_DESC 
      
 {-
