@@ -24,7 +24,7 @@ beginProcess x = case x of
 --process the rest of the AST
 buildTable :: Int -> ST -> ([M_decl],[M_stmt]) -> (Int,ST)
 buildTable tbl (decl,stm) = (n,sTble) where
-    (a,b) = processDecl tbl decl -- process the [M_decl] ie the list of M_decl
+    (a,b) = processDecl tbl decProbleml -- process the [M_decl] ie the list of M_decl
     (c,d) = processStmt b stm' where -- process the {M_stmt] ie the list of M_stmt
         stm' = filter checkStmt stm
         
@@ -37,29 +37,25 @@ checkStmt stm = case stm of
     _ -> False
     
 --to process/insert [M_decl] into the Symbol table
-processMlist :: Int -> ST -> [M_decl] -> (Int,ST)
-processMlist n s (x:xs) = (n, tbl) where
+processDecl:: Int -> ST -> [M_decl] -> (Int,ST)
+processDecl n s (x:xs) = (n, tbl) where
     (i,tbl') = insert conv1 tbl'' desc where
-    (desc,(conv1,tbl))  = (convertMdec i tbl' x)
-        
-            
-            
-            
-    
+    (desc,(conv1,tbl''))  = (convertMdec i tbl' x)         
 processMlist n s [] = (n,s) 
 
 convertMdec :: Int -> ST -> M_decl -> (SYM_DESC,(Int,ST))
 convertMdec n s x = case x of
     M_var (str,expr,i) -> (VARIABLE (str,i,(length expr)),(n,s))      
-    M_fun func -> processFunction func --(str,x,typ,mdec,mstm)
+    M_fun func -> processFunction n s func --(str,x,typ,mdec,mstm)
     
 processFunction :: Int -> ST -> (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt]) -> (SYM_DESC,(Int,ST))
-processFunction n s (str,x,typ,mdec,mstm) =  (new_scope L_FUN fcn) where
+processFunction n s (str,x,typ,mdec,mstm) =  (symDsc,(cnt,tble)) where 
+	(temp_int1,tble_1) = (new_scope L_FUN fcn) where
     fcn = FUNCTION(str, map strip arGs,typ) where
         (arGs,(i,s2)) = convertArgs x
     
-    (FUNCTION (str, map strip x ,typ),(new_scope (L_FUN typ) table)) where 
-        (a,table) = buildTable s (mdec, mstm)
+    --(FUNCTION (str, map strip x ,typ),(new_scope (L_FUN typ) table)) where 
+      --  (a,table) = buildTable s (mdec, mstm)
 	    --[(s,mtyp,i)]= (map strip x)
    -- _ -> (error "Some kind of error")
 --to process/insert [M_stmt] ino the symbol table
