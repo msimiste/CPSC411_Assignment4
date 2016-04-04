@@ -34,14 +34,19 @@ processMlist n s (x:xs) = (out, ts) where
 processMlist n s [] = (n,s) 
 
 
+
+
+
 convertMdec :: ST-> M_decl -> (SYM_DESC,ST)
 convertMdec s x = case x of
-    M_var (str,typ,i) -> (VARIABLE (str,i,(length typ)),s)
+    M_var (str,typ,i) -> (VARIABLE (str,i,(length typ)),s)          
+        
     --M_var (str,typ,i) -> (ARGUMENT (str,i,(length typ)),s)
-    M_fun (str,x,typ,mdec,mstm)-> (FUNCTION (str, map strip x ,typ), table) where 
+    M_fun (str,x,typ,mdec,mstm) -> (FUNCTION (str, map strip x ,typ),(new_scope (L_FUN typ) table)) where 
+    --M_fun (str,x,typ,mdec,mstm)-> (FUNCTION (str, map strip x ,typ),(new_scope (L_FUN typ) table)) where 
 	    (a,table) = buildTable s (mdec, mstm)
 	    --[(s,mtyp,i)]= (map strip x)
-    _ -> (error "Some kind of error")
+   -- _ -> (error "Some kind of error")
     
  {-   
 processStmt :: Int -> ST -> [M_stmt] -> (Int, ST)

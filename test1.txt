@@ -1,5 +1,5 @@
-var x[2]:int;      
-	  fun exp(b:int):int
+var x[1][2]:int;      
+	  fun exp(b:int,c[][]:int):int
 	  { var z:int;
 		begin
 	   return z;

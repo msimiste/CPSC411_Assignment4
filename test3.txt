@@ -1,0 +1,9 @@
+var x:int;      
+	  fun f(y:int,z:int):int
+	  { var x,a:int;
+		begin
+	   return z;
+	   end};
+	  begin
+		
+	  end
