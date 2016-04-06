@@ -17,18 +17,17 @@ new_scope s xs = Symbol_table(s,0,0,[]):xs
 --start point where the initial AST is fed into the Symbol table builder
 beginProcess :: AST -> ST
 beginProcess x = case x of
-    M_prog ([],[]) -> []
+    --M_prog ([],[]) -> []
     M_prog (dec,stm) -> sTable where
         (lastInt,sTable) =  (buildTable 0 tbl rest)
         tbl = new_scope L_PROG empty
         rest = (dec,stm)
 
 --process the rest of the AST
-buildTable :: Int -> ST -> ([M_decl],[M_stmt]) -> (Int,ST)
-buildTable n s ([],[]) = (n,s)  
+buildTable :: Int -> ST -> ([M_decl],[M_stmt]) -> (Int,ST) 
 buildTable n tbl (decl,stm) = (c,sTble) where
     (a,b) = processDecls n tbl decl -- process the [M_decl] ie the list of M_decl
-    (c,sTble) = processStmtS a (b++tbl) stm' -- process the {M_stmt] ie the list of M_stmt
+    (c,sTble) = processStmtS a b stm' -- process the {M_stmt] ie the list of M_stmt
     stm' = filter checkStmt stm -- remove the stmt's that are not part of {M_block,M_while,M_cond}   
 
         
@@ -62,8 +61,9 @@ processDecls n s (x:xs) = (n2,s1) where
     
 
 processDecl :: Int -> ST -> M_decl -> (Int, ST)
-processDecl n s x = insert num sTble symdesc where
-    (symdesc,(num,sTble)) = convertMdec n s x	    
+processDecl n s x = (num,sTble) where
+--processDecl n s x = insert num sTble symdesc where -- remove this 
+    (num,sTble) = convertMdec n s x	    
 
  
 --to process/insert [M_stmt] into the Symbol table
@@ -86,14 +86,16 @@ processStmt n s m = case m of
 
 
 --convert an M_decl into a SYM_DESC
-convertMdec :: Int -> ST -> M_decl -> (SYM_DESC,(Int,ST))
+convertMdec :: Int -> ST -> M_decl -> (Int,ST)
 convertMdec n s x = case x of
-    M_var (str,expr,i) -> (VARIABLE (str,i,(length expr)),(n,s)) --return an M_var converted to a VARIABLE     
+    M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))
+    --(VARIABLE (str,i,(length expr)),(n,s)) --return an M_var converted to a VARIABLE     
     --_ -> ((FUNCTION("mike", [(M_bool,15)], M_real)),(n,s))--,insert n (new_scope (L_FUN M_int) s) (FUNCTION("mike", [(M_bool,15)], M_real)))) 
    -- test = (FUNCTION("mike", [(M_bool,15)], M_real))
     --(test1,test2) = insert n s test
 	    
-    M_fun func -> processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
+    M_fun func -> insert that another this where
+        (this, (that,another)) = processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
     
 
 --to process a function    
@@ -117,8 +119,8 @@ convertArgs n s (x:xs) =  ((front:rest),n2,st2) where
 
 --converts and inserts a single M_var to and ARGUMENT
 convertArg :: Int -> ST -> (String,Int,M_type) -> (SYM_DESC,Int,ST)
-convertArg n s (str,num,typ) = (sym,n,s) where
-	--(num1,st) = insert n s sym -- insert the ARGUMENT into the symbol table
+convertArg n s (str,num,typ) = (sym,num1,st) where
+	(num1,st) = insert n s sym -- insert the ARGUMENT into the symbol table
 	sym = ARGUMENT (str,typ,num) -- convert the (String,Int,M_type) to (String,M_type,Int)
 
 --takes the last 2 values in a tuple and switches their order

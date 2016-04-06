@@ -1,2 +1,4 @@
-var x:int;
-
+var x[1][2]:int;
+begin 
+ read x ;
+end 
