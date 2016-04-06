@@ -18,7 +18,8 @@ main = do
     case ptree of
         Ok tree -> do
             let astree = transProg tree
-            let symbT = beginProcess astree
-            putStrLn $ (ppShow) symbT
+            let symbT = beginProcess astree                       
             --putStrLn $ (ppShow) astree
+            putStrLn $ (ppShow) symbT
+			 
         Bad emgs -> putStrLn emgs

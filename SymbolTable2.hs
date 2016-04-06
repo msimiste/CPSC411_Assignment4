@@ -40,17 +40,31 @@ checkStmt stm = case stm of
     M_block (a,b) -> True
     _ -> False  
 
-    
+ {-   
 --to process/insert [M_decl] into the Symbol table
 processDecls :: Int -> ST -> [M_decl] -> (Int,ST)
 processDecls n s [] = (n,s) 
-processDecls n s (x:xs) = (i, tbl') where
+processDecls n s (x:xs) = (n1, tbl) where
     (i,tbl') = insert n1 tbl desc -- insert the M_decl into the Symbol Table
-    (desc,(n1,tbl))  = (convertMdec i tbl' x) -- convert the M_decl into a SYM_DESC
+    (desc,(n1,tbl))  = (convertMdec n s x) -- convert the M_decl into a SYM_DESC
     (n2,s1) = processDecls n1 tbl xs   -- Process the rest of [M_decl] the list
+-}
 
 
 
+processDecls :: Int -> ST -> [M_decl] -> (Int,ST)
+processDecls n s [] = (n,s) 
+processDecls n s (x:xs) = (n2,s1) where    
+    (n1,tbl)  =  processDecl n s x -- convert the M_decl into a SYM_DESC
+    (n2,s1) = processDecls n1 tbl xs   -- Process the rest of [M_decl] the list
+    
+    
+
+processDecl :: Int -> ST -> M_decl -> (Int, ST)
+processDecl n s x = insert var1 var2 var3 where
+    (var3,(var1,var2)) = convertMdec n s x	    
+
+ 
 --to process/insert [M_stmt] into the Symbol table
 processStmtS :: Int -> ST -> [M_stmt] -> (Int, ST)
 processStmtS n s [] = (n,s) -- handle an empty list
@@ -84,6 +98,9 @@ processFunction n s (str,list_of_trips,typ,mdec,mstm) =  (symDsc,(cnt,tble)) whe
     symDsc = FUNCTION(str, map strip arGs,typ) -- strips the last 2 argument values ie (String,M_type,Int) => (M_type,Int)
     (arGs,cnt1,tble1) = convertArgs n tble' list_of_trips -- convert all the arguments from (String,Int,M_type) to (String,M_type,Int) and insert them into the Symbol table
     (cnt,tble) = buildTable cnt1 tble1 (mdec,mstm)  -- process the remaining [M_decl] [M_stmt] 
+
+
+
 
 --converts [M_var] to [ARGUMENT] as required
 convertArgs :: Int -> ST -> [(String,Int,M_type)] -> ([SYM_DESC],Int,ST)

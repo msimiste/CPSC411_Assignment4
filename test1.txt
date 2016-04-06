@@ -1,9 +1,13 @@
-var x[1][2]:int;      
-	  fun exp(b:int,c[][]:int):int
+var x[1][2]:int;
+ fun exp(b:int,c[][]:int):int
 	  { var z:int;
+		
 		begin
+		
 	   return z;
 	   end};
 	  begin
 		
 	  end
+	 
+
