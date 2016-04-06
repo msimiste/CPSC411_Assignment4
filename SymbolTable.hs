@@ -1,5 +1,5 @@
 
-module SymbolTable (ST,something, empty,new_scope,insert,lookup,return)
+module SymbolTable (ST,beginProcess, empty,new_scope,insert,lookup,return)
 where 
 import ST
 import AST
@@ -12,8 +12,8 @@ new_scope :: ScopeType -> ST -> ST
 new_scope s xs = Symbol_table(s,0,0,[]):xs
 
 
-something :: AST -> ST
-something x = case x of
+beginProcess :: AST -> ST
+beginProcess x = case x of
     M_prog ([],[]) -> []
     M_prog (dec,stm) -> snd (buildTable (new_scope L_PROG empty) (dec,stm))
 

@@ -28,7 +28,7 @@ buildTable :: Int -> ST -> ([M_decl],[M_stmt]) -> (Int,ST)
 buildTable n s ([],[]) = (n,s)  
 buildTable n tbl (decl,stm) = (c,sTble) where
     (a,b) = processDecls n tbl decl -- process the [M_decl] ie the list of M_decl
-    (c,sTble) = processStmtS a b stm' -- process the {M_stmt] ie the list of M_stmt
+    (c,sTble) = processStmtS a (b++tbl) stm' -- process the {M_stmt] ie the list of M_stmt
     stm' = filter checkStmt stm -- remove the stmt's that are not part of {M_block,M_while,M_cond}   
 
         
@@ -56,13 +56,14 @@ processDecls :: Int -> ST -> [M_decl] -> (Int,ST)
 processDecls n s [] = (n,s) 
 processDecls n s (x:xs) = (n2,s1) where    
     (n1,tbl)  =  processDecl n s x -- convert the M_decl into a SYM_DESC
-    (n2,s1) = processDecls n1 tbl xs   -- Process the rest of [M_decl] the list
+    (n2,s1) = processDecls n1 tbl xs  -- Process the rest of [M_decl] the list
+    
     
     
 
 processDecl :: Int -> ST -> M_decl -> (Int, ST)
-processDecl n s x = insert var1 var2 var3 where
-    (var3,(var1,var2)) = convertMdec n s x	    
+processDecl n s x = insert num sTble symdesc where
+    (symdesc,(num,sTble)) = convertMdec n s x	    
 
  
 --to process/insert [M_stmt] into the Symbol table
@@ -88,6 +89,10 @@ processStmt n s m = case m of
 convertMdec :: Int -> ST -> M_decl -> (SYM_DESC,(Int,ST))
 convertMdec n s x = case x of
     M_var (str,expr,i) -> (VARIABLE (str,i,(length expr)),(n,s)) --return an M_var converted to a VARIABLE     
+    --_ -> ((FUNCTION("mike", [(M_bool,15)], M_real)),(n,s))--,insert n (new_scope (L_FUN M_int) s) (FUNCTION("mike", [(M_bool,15)], M_real)))) 
+   -- test = (FUNCTION("mike", [(M_bool,15)], M_real))
+    --(test1,test2) = insert n s test
+	    
     M_fun func -> processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
     
 
@@ -112,8 +117,8 @@ convertArgs n s (x:xs) =  ((front:rest),n2,st2) where
 
 --converts and inserts a single M_var to and ARGUMENT
 convertArg :: Int -> ST -> (String,Int,M_type) -> (SYM_DESC,Int,ST)
-convertArg n s (str,num,typ) = (sym,num1,st) where
-	(num1,st) = insert n s sym -- insert the ARGUMENT into the symbol table
+convertArg n s (str,num,typ) = (sym,n,s) where
+	--(num1,st) = insert n s sym -- insert the ARGUMENT into the symbol table
 	sym = ARGUMENT (str,typ,num) -- convert the (String,Int,M_type) to (String,M_type,Int)
 
 --takes the last 2 values in a tuple and switches their order

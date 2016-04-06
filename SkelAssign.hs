@@ -87,7 +87,7 @@ transBasic_declaration x = case x of
   
 transBasic_array_dimensions :: Basic_array_dimensions -> Int
 transBasic_array_dimensions x = case x of
-  Basic_array_dimensions1 basicarraydimensions -> transBasic_array_dimensions(basicarraydimensions)
+  Basic_array_dimensions1 basicarraydimensions -> transBasic_array_dimensions(basicarraydimensions)+1
   Basic_array_dimensions2 -> 0
   
 transProgram_body :: Program_body -> [M_stmt]
