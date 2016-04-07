@@ -17,7 +17,7 @@ new_scope s xs = Symbol_table(s,0,0,[]):xs
 --start point where the initial AST is fed into the Symbol table builder
 beginProcess :: AST -> ST
 beginProcess x = case x of
-    M_prog (dec,stm) -> sTable where
+    M_prog (dec,stm) -> sTable where --sTable 
         (lastInt,sTable) =  (buildTable 0 tbl rest)
         tbl = new_scope L_PROG empty
         rest = (dec,stm)
@@ -65,7 +65,8 @@ processStmtS n s (x:xs) = (a,b) where --
 processStmt :: Int -> ST -> M_stmt -> (Int, ST)
 processStmt n s m = case m of    
     --M_block(dec,stm) -> buildTable n s (dec,stm)
-    M_block (dec,stm) -> buildTable n (new_scope L_BLK s) (dec,stm) -- add an M_block to the symbol table
+    M_block (dec,stm) -> (num,s) where
+		(num,stble) = buildTable n (new_scope L_BLK s) (dec,stm) -- add an M_block to the symbol table
     _ -> (n,s)
     --ToDo: add these in for IR version
    -- M_while (expr,stm1) -> 
@@ -75,20 +76,23 @@ processStmt n s m = case m of
 --convert an M_decl into a SYM_DESC
 convertMdec :: Int -> ST -> M_decl -> (Int,ST)
 convertMdec n s x = case x of
-    M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))	    
-    M_fun func -> insert num sTbl symDesc where
-        (symDesc, (num,sTbl)) = processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
+    M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))
+    M_fun fun ->  processFunction n s fun 	    
+   -- M_fun func -> insert num sTbl symDesc where
+     --   (symDesc, (num,sTbl)) = processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
     
 --to process a function    
-processFunction :: Int -> ST -> (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt]) -> (SYM_DESC,(Int,ST))
-processFunction n s (str,list_of_trips,typ,mdec,mstm) =  (symDsc,(cnt,tble)) where 
-    tble' = (new_scope (L_FUN typ) s) -- add a new function scope to the symbol table
-    symDsc = FUNCTION(str, map strip arGs,typ) -- strips the last 2 argument values ie (String,M_type,Int) => (M_type,Int)
-    (arGs,cnt1,tble1) = convertArgs n tble' list_of_trips -- convert all the arguments from (String,Int,M_type) to (String,M_type,Int) and insert them into the Symbol table
-    --(cnt,tble) = buildTable cnt1 tble1 (mdec,mstm)  -- process the remaining [M_decl] [M_stmt] 
-    --(cnt,tble) = buildTable n s (mdec,mstm)
-    (cnt2,tble2) = processDecls n tble1 mdec
-    (cnt,tble) = processStmtS cnt2 tble2 mstm
+processFunction :: Int -> ST -> (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt]) -> (Int,ST)
+processFunction n s (str,list_of_trips,typ,mdec,mstm) =  (cnt,tble3) 
+  where    
+    (num3,tble3) = insert n s symDsc-- strips the last 2 argument values ie (String,M_type,Int) => (M_type,Int)
+    symDsc = (FUNCTION(str, map strip arGs,typ))
+    tble' = (new_scope (L_FUN typ) tble3) -- add a new function scope to the symbol table
+    (arGs,cnt1,tble1) = convertArgs num3 tble3 list_of_trips -- convert all the arguments from (String,Int,M_type) to (String,M_type,Int) and insert them into the Symbol table
+    --(cnt2,tble2) = buildTable cnt1 tble1 (mdec,mstm)  -- process the remaining [M_decl] [M_stmt] 
+    (cnt,tble) = buildTable cnt1 tble1 (mdec,mstm)
+    --(cnt2,tble2) = processDecls n tble' mdec
+    --(cnt,tble) = processStmtS cnt2 tble2 mstm
 
 --converts [M_var] to [ARGUMENT] as required
 convertArgs :: Int -> ST -> [(String,Int,M_type)] -> ([SYM_DESC],Int,ST)

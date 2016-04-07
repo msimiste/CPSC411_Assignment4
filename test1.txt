@@ -1,4 +1,5 @@
 var x[1][2]:int;
+
  fun exp(b:int,c[][]:int,d[]:int):int
 	  { var z[3]:int;
 		var t[1][2]:int;
@@ -7,6 +8,7 @@ var x[1][2]:int;
 		
 	   return t;
 	   end};
+	   var u:int;
 	  begin
 		
 	  end

@@ -1,7 +1,7 @@
 module IRGen where
 
 import AST
-import SymbolTable as SymbolTable
+import SymbolTable as S
 import IRDataType
 
 transProg :: M_prog -> I_prog
@@ -9,7 +9,7 @@ transProg (M_prog (decls,stmts)) = I_PROG (fbodies,length localvars, tstmts)
     where
         tstmts  = transStmtS stmts (n,st)
         fbodies = transDecl_FUNS decls (n,st)
-        (n,st) = genSymTabBlock 0 L_PROG decls []
+        (n,st) = beginProcess (M_prog (decls,stmts))
         localvars = filter (\x -> isM_var x) decls
         funs = filter (\x -> (not.isM_var) x) decls
         
@@ -19,7 +19,7 @@ transDevl_FUNS (d:ds) st = f:(transDecl_FUNS ds (n,st))
     where f = transDecl_FUN d (n,st)
     
 transDecl_FUN :: M_decl -> (Int, S.ST) -> I_fbody
-transDecl_FUN decl (N,st = 
+transDecl_FUN decl (n,st) = 
     case decl of
         M_fun (fname, args_triple, otype,decls,stmts) -> I_FUN(fname,fbodies,length localvars, length args_triple)
                where
@@ -29,7 +29,7 @@ transDecl_FUN decl (N,st =
                     st_fun = 
                     
 ....
-
+transStmt :: M_stmt -> (Int, S.ST) -> I_stmt
 transStmt stmt (n,st) = case stmt of
        M_ass (str,expr) -> I_ASS (level,offset,texpr)
             where   
