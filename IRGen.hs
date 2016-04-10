@@ -13,7 +13,7 @@ transProg (M_prog (decls,stmts)) = I_PROG (fbodies,length localvars, tstmts)
         localvars = filter (\x -> isM_var x) decls
         funs = filter (\x -> (not.isM_var) x) decls
         
-transDecl_FUNS :: {M_decl] -> (Int,S.ST) -> [I_fbody]
+transDecl_FUNS :: [M_decl] -> (Int,S.ST) -> [I_fbody]
 transDecl_FUNS [] (n,st) = []
 transDevl_FUNS (d:ds) st = f:(transDecl_FUNS ds (n,st))
     where f = transDecl_FUN d (n,st)
