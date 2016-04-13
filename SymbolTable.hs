@@ -18,15 +18,16 @@ new_scope s xs = Symbol_table(s,0,0,[]):xs
 beginProcess :: AST -> ST
 beginProcess x = case x of
     M_prog (dec,stm) -> sTable where --sTable 
-        (lastInt,sTable) =  (buildTable 0 tbl rest)
+        (lastInt,sTable) =  (buildTable 0 scope tbl rest)
         tbl = new_scope L_PROG empty
+        scope = returnScope tbl
         rest = (dec,stm)
 
 --process the rest of the AST
-buildTable :: Int -> ST -> ([M_decl],[M_stmt]) -> (Int,ST) 
-buildTable n tbl (decl,stm) = (c,sTble) where
-    (a,b) = processDecls n tbl decl -- process the [M_decl] ie the list of M_decl
-    (c,sTble) = processStmtS a b stm' -- process the {M_stmt] ie the list of M_stmt
+buildTable :: Int -> ScopeType -> ST -> ([M_decl],[M_stmt]) -> (Int,ST) 
+buildTable n scope tbl (decl,stm) = (c,sTble) where
+    (a,b) = processDecls n scope tbl decl -- process the [M_decl] ie the list of M_decl
+    (c,sTble) = processStmtS a scope b stm' -- process the {M_stmt] ie the list of M_stmt
     stm' = filter checkStmt stm -- remove the stmt's that are not part of {M_block,M_while,M_cond}   
 
         
@@ -40,11 +41,11 @@ checkStmt stm = case stm of
 
 
 --process the [M_decl] ie the list of M_decl's
-processDecls :: Int -> ST -> [M_decl] -> (Int,ST)
-processDecls n s [] = (n,s) -- handle the empty list
-processDecls n s (x:xs) = (n2,s1) where    
+processDecls :: Int -> ScopeType -> ST -> [M_decl] -> (Int,ST)
+processDecls n scope s [] = (n,s) -- handle the empty list
+processDecls n scope s (x:xs) = (n2,s1) where    
     (n1,tbl)  =  processDecl n s x -- convert the M_decl into a SYM_DESC
-    (n2,s1) = processDecls n1 tbl xs  -- Process the rest of [M_decl] the list    
+    (n2,s1) = processDecls n1 scope tbl xs  -- Process the rest of [M_decl] the list    
     
     
 --process a single M_decl
@@ -54,11 +55,11 @@ processDecl n s x = (num,sTble) where
 
  
 --to process/insert [M_stmt] into the Symbol table
-processStmtS :: Int -> ST -> [M_stmt] -> (Int, ST)
-processStmtS n s [] = (n,s) -- handle an empty list
-processStmtS n s (x:xs) = (a,b) where --
+processStmtS :: Int -> ScopeType -> ST -> [M_stmt] -> (Int, ST)
+processStmtS n scope s [] = (n,s) -- handle an empty list
+processStmtS n scope s (x:xs) = (a,b) where --
     (c,d) = processStmt n s x -- process the first M_stms in the list
-    (a,b) = processStmtS c d xs -- process the rest of the list
+    (a,b) = processStmtS c scope d xs -- process the rest of the list
 
 
 --process an M_stmt
@@ -66,7 +67,7 @@ processStmt :: Int -> ST -> M_stmt -> (Int, ST)
 processStmt n s m = case m of    
     --M_block(dec,stm) -> buildTable n s (dec,stm)
     M_block (dec,stm) -> (num,s) where
-		(num,stble) = buildTable n (new_scope L_BLK s) (dec,stm) -- add an M_block to the symbol table
+		(num,stble) = buildTable n L_BLK (new_scope L_BLK s) (dec,stm) -- add an M_block to the symbol table
     _ -> (n,s)
     --ToDo: add these in for IR version
    -- M_while (expr,stm1) -> 
@@ -77,23 +78,24 @@ processStmt n s m = case m of
 convertMdec :: Int -> ST -> M_decl -> (Int,ST)
 convertMdec n s x = case x of
     M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))
-    M_fun fun ->  processFunction n s fun 	    
+    M_fun fun ->  processFunction n' s' fun where
+        (n',s') = genSymTabFun n (M_fun fun) s
    -- M_fun func -> insert num sTbl symDesc where
      --   (symDesc, (num,sTbl)) = processFunction n s func --(str,x,typ,mdec,mstm), process the M_func
     
 --to process a function    
 processFunction :: Int -> ST -> (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt]) -> (Int,ST)
 processFunction n s (str,list_of_trips,typ,mdec,mstm) =  (cnt,tble3) 
-  where    
-    (num3,tble3) = insert n s symDsc-- strips the last 2 argument values ie (String,M_type,Int) => (M_type,Int)
+  where  
+    --(n',s') = genSymTabFun n (M_fun(str,list_of_trips,typ,mdec,mstm)) s
+    (num3,tble3) = insert n s symDsc -- strips the last 2 argument values ie (String,M_type,Int) => (M_type,Int)
     symDsc = (FUNCTION(str, map strip arGs,typ))
     tble' = (new_scope (L_FUN typ) tble3) -- add a new function scope to the symbol table
     (arGs,cnt1,tble1) = convertArgs num3 tble3 list_of_trips -- convert all the arguments from (String,Int,M_type) to (String,M_type,Int) and insert them into the Symbol table
-    --(cnt2,tble2) = buildTable cnt1 tble1 (mdec,mstm)  -- process the remaining [M_decl] [M_stmt] 
-    (cnt,tble) = buildTable cnt1 tble1 (mdec,mstm)
-    --(cnt2,tble2) = processDecls n tble' mdec
-    --(cnt,tble) = processStmtS cnt2 tble2 mstm
-
+    
+    (cnt,tble) = buildTable cnt1 (returnScope tble1) tble1 (mdec,mstm)
+    --(cnt4,tble4) = processDecls cnt1 (returnScope tble1) tble1 (mdec)
+    --(cnt,tble) = processStmtS cnt4 (returnScope tble4) tble4 mstm
 --converts [M_var] to [ARGUMENT] as required
 convertArgs :: Int -> ST -> [(String,Int,M_type)] -> ([SYM_DESC],Int,ST)
 convertArgs n s [] = ([], n, s) -- on an empty list return the existing (Int, ST)
@@ -156,3 +158,23 @@ look_up s x = find 0 s where
         |x == str = Just v
         |otherwise = find_level rest 
     find_level [] = Nothing
+
+genSymTabBlock :: Int -> ScopeType -> [M_decl] -> ST -> (Int, ST)
+genSymTabBlock n scope decls st = 
+        case scope `elem` [L_PROG,L_BLK] of
+            True -> processDecls n scope st' decls
+                where
+                st' = new_scope scope st
+            False -> error "Using wrong symtable"
+            
+genSymTabFun :: Int -> M_decl -> ST -> (Int, ST)
+genSymTabFun n (M_fun (str,args_triple,otype,decls, stmts)) st  = processDecls n' scope st2 decls
+    where
+        scope = (L_FUN otype)
+        (args,a,b) = convertArgs n st args_triple
+        st1 = new_scope scope st
+        (n',st2) = foldl (\(n',st3) x -> insert n' st3 x) (n,st1) args
+        
+returnScope :: ST -> ScopeType
+returnScope st = case st of
+    [Symbol_table(s,_,_,_)] -> s

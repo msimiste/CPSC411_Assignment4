@@ -11,8 +11,8 @@ generate_sym_decl n scope decl stabs = case of
             sym_desc  = FUNCTION (fname,args_pair,otype)
             args_pair = mape(\(name,dim,typea) -> (typea,dim)) args_triple
 
-genSymTabeBlock :: INt -> ScopeType -> [M_decl] -> ST -> (Int, ST)
-genSymTabBlcok n scope decls st = 
+genSymTabBlock :: Int -> ScopeType -> [M_decl] -> ST -> (Int, ST)
+genSymTabBlock n scope decls st = 
         case scop 'ele' [L_PROG,L_BLK] of
             True -> generate_syym_decls n scope decls st'
                 hwere

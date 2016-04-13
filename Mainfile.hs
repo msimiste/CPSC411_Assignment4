@@ -19,6 +19,6 @@ main = do
         Ok tree -> do
             let astree = transProg tree
             let symbT = beginProcess astree
-            ---putStrLn $ (ppShow) symbT
-            putStrLn $ (ppShow) astree
+            putStrLn $ (ppShow) symbT
+            --putStrLn $ (ppShow) astree
         Bad emgs -> putStrLn emgs

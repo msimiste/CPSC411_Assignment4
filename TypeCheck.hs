@@ -3,10 +3,10 @@ import AST
 import SYmbolTable as S
 import IRDataType
 
-typeProce :: M_prog -> Bool
+typeProg :: M_prog -> Bool
 typeProg (M_prog (decls,stmts)) = cstmts && cdecls
     where
-        cstms = cehckStmtS stmst (n, st)
+        cstms = checkStmtS stmst (n, st)
         cdecls = checkDecls decls (n,st)
         (n,st) = getnSymTabBlock 0 L_PROG decls []
     
