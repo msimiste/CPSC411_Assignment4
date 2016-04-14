@@ -21,8 +21,10 @@ transMdecls st (x:xs) = case x of
     --fList = S.look_up
 	
 transMdecl :: ST -> M_decl -> I_fbody
-transMdecl st (lbl,list,typ) = fbdy where
-        fbdy = S.look_up st lbl
+transMdecl st (name,triple,rTyp,dec,stm) = fbdy where
+        (lev,nam,list,typ) = S.look_up st lbl
+        fbdy = (nam,iFcns,numVars,numArgs,stmts)
+        numVars = length(isVar (triple
 	
 isVar :: M_decl -> bool
 isVar m = case m of
