@@ -24,12 +24,14 @@ transMdecl :: ST -> M_decl -> I_fbody
 transMdecl st (name,triple,rTyp,dec,stm) = fbdy where
         (lev,nam,list,typ) = S.look_up st lbl
         fbdy = (nam,iFcns,numVars,numArgs,stmts)
-        numVars = length(isVar (triple
+        st = Symbol_table (_,numVars,numArgs,_)
+        iFcns' = not.isVar(dec)
+        iFcns = map(\x -> convertMfun x) iFcns'
 	
 isVar :: M_decl -> bool
 isVar m = case m of
 	M_var -> True
 	_ -> False
 	
-convertMfun :: M_fun -> I_fun
-convertMfun M_fun(name,triple,typ,decls,stmts)
+convertMfun :: st -> M_fun -> IFUN 
+convertMfun M_fun(name,triple,typ,decls,stmts) = IFUN (lbl,[I_fbody],Int,Int[I_stmt])
