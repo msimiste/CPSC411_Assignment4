@@ -79,6 +79,7 @@ processStmt n scope s m = case m of
     M_cond (exp,stm1,stm2) -> (num1,st2) where
 		(num2,st3) = processStmt n scope s stm1
 		(num1,st2) = processStmt n scope st3 stm2
+    x -> (n, s)
 	
      
 

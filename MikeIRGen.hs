@@ -61,8 +61,7 @@ transMstmt st x = case x of
         fbdys = transMdecls st fbdys'
         locV = length(dec) - length(fbdys)
         stmts = transMstmts st stm 
-   -- x -> e where
-     --   e = error("Error" ++ show(x))        
+           
     
 convertMexpr :: ST -> M_expr -> I_expr
 convertMexpr st x = case x of
