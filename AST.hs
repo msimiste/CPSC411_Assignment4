@@ -8,7 +8,7 @@ data M_decl = M_var (String,[M_expr],M_type)
             | M_fun (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt])
             deriving (Eq,Show,Ord, Read)
             
-data M_stmt = M_ass (String,[M_expr],M_expr)
+data M_stmt = M_ass (String,[M_expr],M_expr) --(varname, expList,exp)
             | M_while (M_expr,M_stmt)
             | M_cond (M_expr,M_stmt,M_stmt) 
             | M_read (String,[M_expr])

@@ -1,5 +1,5 @@
 
-module SymbolTable (ST,beginProcess,empty,new_scope,insert,lookup,return)
+module SymbolTable (ST,beginProcess,empty,new_scope,insert,look_up,return)
 where 
 import ST
 import AST
@@ -74,7 +74,13 @@ processStmt n scope s m = case m of
     M_block (dec,stm) -> (num,tble) where
         (num1,tble1) = genSymTabBlock n scope dec s
         (num2,tble2) = processDecls n scope s dec
-        (num,tble) = processStmtS n scope s stm   
+        (num,tble) = processStmtS n scope s stm 
+    M_while (exp,stm) -> processStmt n scope s stm
+    M_cond (exp,stm1,stm2) -> (num1,st2) where
+		(num2,st3) = processStmt n scope s stm1
+		(num1,st2) = processStmt n scope st3 stm2
+	
+     
 
 --converts [M_var] to [ARGUMENT] as required
 convertArgs :: Int -> ST -> [(String,Int,M_type)] -> ([SYM_DESC],Int,ST)

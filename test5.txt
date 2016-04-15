@@ -1,0 +1,25 @@
+% funcs in blocks, funcs/vars with same name
+
+var a:bool;
+
+begin
+	read a;
+	if (a) then
+	{ 
+		fun test(a:int):int
+		{
+			var b:int;
+			begin
+				read b;
+				return a+b;
+			end
+		};
+		
+		begin 
+			print a;
+			print test(1+2);
+		end 
+	}
+	else
+		a := true;
+end
