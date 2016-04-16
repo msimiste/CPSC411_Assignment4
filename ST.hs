@@ -13,11 +13,11 @@ data SYM_DESC = ARGUMENT (String,M_type,Int) --(name, type, dimensions)
               deriving (Eq,Show,Ord, Read)
 
 data SYM_I_DESC = I_VARIABLE (Int,Int,M_type,Int) --(level,offset,type,dimension)
-			  | I_FUNCTION (Int,String,[(M_type,Int)],M_type) --(level,label,[(argType,dimension)]type)
-			  | I_CONSTRUCTOR (Int,[M_type],String) --(constructor#,[type],datatypename)
-			  | I_TYPE [String]
-			  deriving (Eq,Show,Ord, Read)
-			  
+              | I_FUNCTION (Int,String,[(M_type,Int)],M_type) --(level,label,[(argType,dimension)]type)
+              | I_CONSTRUCTOR (Int,[M_type],String) --(constructor#,[type],datatypename)
+              | I_TYPE [String]
+              deriving (Eq,Show,Ord, Read)
+              
 data ScopeType = L_PROG 
               | L_FUN M_type -- M_type = return type
               | L_BLK 

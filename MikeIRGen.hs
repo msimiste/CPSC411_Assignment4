@@ -41,15 +41,11 @@ transMstmts st (x:xs) = (transMstmt st x):(transMstmts st xs)
 
 transMstmt :: ST -> M_stmt -> I_stmt
 transMstmt st x = case x of
-   {- M_ass (str,expList,exp) -> thisisatest where        
-        I_VARIABLE(lev,off,_,_) = look_up st str -- some problem here??
-        expr = convertMexpr st exp
-        thisisatest = IASS(lev,off,expr)-} 
     M_ass (str,expList,exp) -> testing where
          expr = (convertMexpr st exp) -- some problem here??
          testing = case (look_up st str) of
-			I_VARIABLE(lev,off,_,_) -> IASS(lev,off,expr)
-			x -> error("transMstmt: " ++ show(x))   	      
+            I_VARIABLE(lev,off,_,_) -> IASS(lev,off,expr)
+            x -> error("transMstmt: " ++ show(x))             
     M_while (e,s) -> IWHILE(exp,stm) where
         exp = convertMexpr st e
         stm = transMstmt st s

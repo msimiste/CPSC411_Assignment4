@@ -26,9 +26,9 @@ data I_stmt = IASS      (Int,Int,I_expr) --(level,offset,expr)
             | IBLOCK    ([I_fbody],Int,[I_stmt])
             deriving (Eq,Show,Ord, Read)
          -- a block consists of 
-		 -- (a) a list of local functions
-		 -- (b) the number of local varibles declared
-		 -- (c) the body: a lst of statements
+         -- (a) a list of local functions
+         -- (b) the number of local varibles declared
+         -- (c) the body: a lst of statements
          
 data I_expr = INUM      Int
             | IBOOL     Bool
@@ -36,8 +36,8 @@ data I_expr = INUM      Int
             | IAPP      (I_opn,[I_expr])
             deriving (Eq,Show,Ord, Read)
          --   isize(<level>,<offset>,<which dimension>)
-		 --   level and offset identify which array the last integer 
-		 --   tells you which dimension you want to look at!!
+         --   level and offset identify which array the last integer 
+         --   tells you which dimension you want to look at!!
 
             
 data I_opn = ICALL      (String,Int) --(label,level)
