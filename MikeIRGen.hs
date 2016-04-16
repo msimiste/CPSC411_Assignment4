@@ -4,12 +4,16 @@ import AST
 import SymbolTable as S
 import IRDataType
 import ST
+import Semantic
 
 transProgIR :: AST -> I_prog
 transProgIR (M_prog(mdec,mstmt)) = IPROG (fcnList, len , stmts) where
     fcnList' = (filter(\x -> not (isVar x))) mdec
     len = length (filter isVar(mdec))
     st = beginProcess (M_prog(mdec,mstmt))
+    semanticResult = case typeProg st (M_prog(mdec,mstmt)) of
+        True -> True
+        False -> error ("Semantic Analysis Produced an Error")
     fcnList = transMdecls st fcnList'
     stmts = transMstmts st mstmt
     
@@ -37,9 +41,15 @@ transMstmts st (x:xs) = (transMstmt st x):(transMstmts st xs)
 
 transMstmt :: ST -> M_stmt -> I_stmt
 transMstmt st x = case x of
-    M_ass (str,expList,exp) -> IASS(lev,off,expr) where        
+   {- M_ass (str,expList,exp) -> thisisatest where        
         I_VARIABLE(lev,off,_,_) = look_up st str -- some problem here??
         expr = convertMexpr st exp
+        thisisatest = IASS(lev,off,expr)-} 
+    M_ass (str,expList,exp) -> testing where
+         expr = (convertMexpr st exp) -- some problem here??
+         testing = case (look_up st str) of
+			I_VARIABLE(lev,off,_,_) -> IASS(lev,off,expr)
+			x -> error("transMstmt: " ++ show(x))   	      
     M_while (e,s) -> IWHILE(exp,stm) where
         exp = convertMexpr st e
         stm = transMstmt st s
@@ -61,6 +71,7 @@ transMstmt st x = case x of
         fbdys = transMdecls st fbdys'
         locV = length(dec) - length(fbdys)
         stmts = transMstmts st stm 
+   
            
     
 convertMexpr :: ST -> M_expr -> I_expr

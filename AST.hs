@@ -4,7 +4,7 @@ module AST where
 data M_prog = M_prog ([M_decl],[M_stmt])
             deriving (Eq,Show,Ord, Read)
                
-data M_decl = M_var (String,[M_expr],M_type)
+data M_decl = M_var (String,[M_expr],M_type) --(name, dimensions,type)
             | M_fun (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt])
             deriving (Eq,Show,Ord, Read)
             
