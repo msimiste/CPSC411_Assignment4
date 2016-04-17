@@ -11,11 +11,14 @@ transProgIR (M_prog(mdec,mstmt)) = IPROG (fcnList, len , stmts) where
     fcnList' = (filter(\x -> not (isVar x))) mdec
     len = length (filter isVar(mdec))
     st = beginProcess (M_prog(mdec,mstmt))
+    fcnList = case semanticResult of 
+        True -> transMdecls st fcnList'
+    stmts = case semanticResult of
+        True -> transMstmts st mstmt
     semanticResult = case typeProg st (M_prog(mdec,mstmt)) of
-        True -> True
+        True -> True            
         False -> error ("Semantic Analysis Produced an Error")
-    fcnList = transMdecls st fcnList'
-    stmts = transMstmts st mstmt
+    
     
     
 transMdecls :: ST -> [M_decl] -> [I_fbody]

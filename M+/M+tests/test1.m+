@@ -1,4 +1,4 @@
-var x:bool;
+var x:int;
 begin
   read x;
   x:= x + 1;
