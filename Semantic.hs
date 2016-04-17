@@ -23,7 +23,7 @@ checkDecls st (x:xs) = (checkDecl st x) && (checkDecls st xs)
 
 checkDecl :: ST -> M_decl -> Bool
 checkDecl st dec = case dec of
-    M_var(str,listExp,typ) -> checkSameMexpr listExp typ && truthVal1 where
+    M_var(str,listExp,typ) -> checkSameMexpr st listExp typ && truthVal1 where
         truthVal1 = case (S.look_up st str) of
             I_VARIABLE a  -> True --error("line 24 :" ++ show(a))
             x -> error("Semantic error checkDecl_M_var " ++ show(x))
@@ -44,14 +44,14 @@ checkStmt :: ST -> M_stmt -> Bool
 checkStmt st stmt = case stmt of
     M_ass (str,expList,exp) -> truth1 where --error("reached line 41: "++show(stmt))
         truth1 = case (S.look_up st str) of
-            I_VARIABLE(_,_,typ,_) ->  checkSameMexpr (exp:expList) typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))--checkSameMexpr [exp] typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))
-            I_FUNCTION(_,_,_,typ) -> error("just a 2nd test :" ++ show(checkSameMexpr [exp] typ))
+            I_VARIABLE(_,_,typ,_) ->  checkSameMexpr st (exp:expList) typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))--checkSameMexpr [exp] typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))
+            I_FUNCTION(_,_,_,typ) -> error("just a 2nd test :" ++ show(checkSameMexpr st [exp] typ))
             x -> error("showing :" ++ show(x))
     M_while (exp,stmt) -> (checkExpr st exp) && (checkStmt st stmt) --error("Reached line 46: ")
     M_cond (exp,stmt1,stmt2) -> (checkStmt st stmt1) && (checkStmt st stmt2)--error("Reached line 47:")--((checkExpr st  exp) && (checkStmt st stmt1) && (checkStmt st stmt2))--("Reached line 47:")
     M_read (str,exprs) -> truth1 where
         truth1 = case(S.look_up st str) of
-            I_VARIABLE(_,_,typ,_) -> checkSameMexpr exprs typ--error("line 51 : "++show( checkSameMexpr exprs typ)) --error("Reached line 50:" ++ show (stmt))
+            I_VARIABLE(_,_,typ,_) -> checkSameMexpr st exprs typ--error("line 51 : "++show( checkSameMexpr exprs typ)) --error("Reached line 50:" ++ show (stmt))
     M_print expr -> checkExpr st expr --error("line 52 : " ++ show(checkExpr st expr)++"\n stmt: "++show(stmt)++" \nexpr: "++show(expr)) --error("Reached line 51: "++show(stmt))
     M_return expr -> checkExpr st expr -- error("Reached line 52:") 
     M_block (decs,stmts) -> (checkDecls st decs) && (checkStmts st stmts) -- error("Reached line 54:") 
@@ -71,9 +71,9 @@ validateOperation :: ST -> M_operation -> [M_expr] -> Bool
 validateOperation st operate exprs = case operate of
     M_fn str -> truth1 where
         truth1 = case (S.look_up st str) of
-            I_FUNCTION(_,_,list,_) -> case ((exprToType exprs) == (convertParams list)) of
+            I_FUNCTION(_,_,list,_) -> case ((exprToType st exprs) == (convertParams list)) of
                 True -> True
-                False -> error("error in M_fn of validateOperation : " ++ show(exprToType exprs)++ " not equal to \n"++show(convertParams list))-- error("line 71 : "++"\n exprs : "++ show(exprs)++"\n totype: " ++show(exprToType exprs)++"\n list: "++ show(list) ++ "\n totype: "++show(convertParams list))
+                False -> error("error in M_fn of validateOperation : " ++ show(exprToType st exprs)++ " not equal to \n"++show(convertParams list))-- error("line 71 : "++"\n exprs : "++ show(exprs)++"\n totype: " ++show(exprToType st exprs)++"\n list: "++ show(list) ++ "\n totype: "++show(convertParams list))
     M_add -> case (foldl(\truth x -> checkMival x) True exprs) of 
         True -> True
         False -> error ("error in M_add of validateOperation : " ++ show(exprs))
@@ -95,7 +95,7 @@ validateOperation st operate exprs = case operate of
     M_le -> case (foldl(\truth x -> checkMival x) True exprs) of
         True -> True
         False -> error ("error in M_le of validateOperation : " ++ show(exprs))
-    M_gt -> case (foldl(\truth x -> checkMival x) True exprs) of
+    M_gt -> case (foldl(\truth x -> x == M_int) True (exprToType st exprs)) of
         True -> True
         False -> error ("error in M_gt of validateOperation : " ++ show(exprs))
     M_ge -> case (foldl(\truth x -> checkMival x) True exprs) of
@@ -114,26 +114,33 @@ validateOperation st operate exprs = case operate of
         True -> True
         False -> error ("error in M_or of validateOperation : " ++ show(exprs))
             
-exprToType ::[M_expr] -> [M_type]
-exprToType [] = []
-exprToType (x:xs) = case x of
-    M_ival _ ->  M_int:(exprToType xs)
-    M_bval _ -> M_bool:(exprToType xs)
-    M_rval _ -> M_real:(exprToType xs)
-    M_id (str,exps) -> (exprToType exps) ++ (exprToType xs)
-    M_app (op,exps) -> (exprToType exps) ++ (exprToType xs)
+exprToType :: ST -> [M_expr] -> [M_type]
+exprToType st [] = []
+exprToType st (x:xs) = case x of
+    M_ival _ ->  M_int:(exprToType st xs)
+    M_bval _ -> M_bool:(exprToType st xs)
+    M_rval _ -> M_real:(exprToType st xs)
+    M_id (str,exps) -> (getM_id st str):(exprToType st exps) ++ (exprToType st xs)
+    M_app (op,exps) -> (exprToType st exps) ++ (exprToType st xs)
    -- _ -> error("Error in fcn params line 92: " ++ show(x))
+
+
+getM_id :: ST -> String -> M_type
+getM_id st str = case (S.look_up st str) of
+    I_VARIABLE(_,_,typ,_) -> typ
+    I_FUNCTION(_,_,_,typ) -> typ
+    x -> error("error in getM_id : "++show(x))
     
 convertParams :: [(M_type,Int)] -> [M_type]
 convertParams [] = []
 convertParams ((x,t):xs) = (x:(convertParams xs)) 
 
  
-checkSameMexpr :: [M_expr] -> M_type -> Bool
-checkSameMexpr [] typ = True --error("checkSameMexpr line 101 : "++show(typ))
-checkSameMexpr exp typ = case (foldl(\truth x -> x == typ) True (exprToType exp)) of
+checkSameMexpr :: ST -> [M_expr] -> M_type -> Bool
+checkSameMexpr st [] typ = True --error("checkSameMexpr line 101 : "++show(typ))
+checkSameMexpr st exp typ = case (foldl(\truth x -> x == typ) True (exprToType st exp)) of
     True -> True
-    False -> error("error in M_int of checkSameMexpr: \n" ++ show(exprToType exp) ++ "\n "++show(typ) ++" are not equal")
+    False -> error("error in M_int of checkSameMexpr: \n" ++ show(exprToType st exp) ++ "\n "++show(typ) ++" are not equal")
 
 checkMival :: M_expr -> Bool
 checkMival x = case x of
