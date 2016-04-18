@@ -4,6 +4,7 @@ import ST
 import AST
 import Text.Show.Pretty
 
+
 empty :: ST 
 empty = []
  
@@ -52,13 +53,13 @@ processDecl :: Int -> ST -> M_decl -> (Int, ST)
 processDecl n s x = case x of
     M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))
     M_fun (str1,triple,typ1,dec,stm) -> genSymTabFun n' fun s' where --or (test1,s) ask prashant about this
-		--(test1,test2) = genSymTabFun n' fun s'
-		(n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
-		fun = M_fun (str1,triple,typ1,dec,stm)
+        --(test1,test2) = genSymTabFun n' fun s'
+        (n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
+        fun = M_fun (str1,triple,typ1,dec,stm)
     {-M_fun (str1,triple,typ1,dec,stm) -> (test1,s) where
-		(test1,test2) = genSymTabFun n' fun s'
-		(n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
-		fun = M_fun (str1,triple,typ1,dec,stm) -}
+        (test1,test2) = genSymTabFun n' fun s'
+        (n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
+        fun = M_fun (str1,triple,typ1,dec,stm) -}
         
 
 
@@ -75,14 +76,14 @@ processStmtS n scope s (x:xs) = (a,b) where --
 --process an M_stmt
 processStmt :: Int -> ScopeType -> ST -> M_stmt -> (Int, ST)
 processStmt n scope s m = case m of   
-    M_block (dec,stm) -> (num,s) where
+    M_block (dec,stm) -> (num,tble) where
         (num1,tble1) = genSymTabBlock n scope dec s
-        (num2,tble2) = processDecls n scope tble1 dec
-        (num,tble) = processStmtS n scope tble2 stm 
+        (num2,tble2) = processDecls num1 scope tble1 dec
+        (num,tble) = processStmtS num2 scope tble2 stm 
     M_while (exp,stm) -> processStmt n scope s stm
     M_cond (exp,stm1,stm2) -> (num1,st2) where
         (num2,st3) = processStmt n scope s stm1
-        (num1,st2) = processStmt n scope st3 stm2
+        (num1,st2) = processStmt num2 scope st3 stm2
     x -> (n, s)
     
      
@@ -138,7 +139,7 @@ look_up s x = find 0 s where
     found level (Con_attr (cnum, t, name)) = I_CONSTRUCTOR (cnum,t,name)
     found level (Typ_attr s) = I_TYPE s
     
-    find n [] = error ("Could not find "++ppShow(x)++"\n"++ppShow(s)	)
+    find n [] = error ("Could not find "++ppShow(x)++"\n"++ppShow(s)    )
     find n (Symbol_table(_,_,_,vs):rest) = 
          (case find_level vs of 
             Just v -> found n v
@@ -156,10 +157,10 @@ genSymTabBlock n scope decls st =
             True -> processDecls n scope st' (sortDecls decls)
                 where
                 st' = new_scope scope st
-            False -> error "Using wrong symtable"
+            False ->  processDecls n scope st (sortDecls decls)--serror ("Using wrong symtable" ++ ppShow(decls))
             
 genSymTabFun :: Int -> M_decl -> ST -> (Int, ST)
-genSymTabFun n (M_fun (str,args_triple,otype,decls, stmts)) st  = (num2,tble2)
+genSymTabFun n (M_fun (str,args_triple,otype,decls, stmts)) st  = (num3,tble3)
     where
         scope = (L_FUN otype)
         (args,a,b) = convertArgs n st args_triple
@@ -167,7 +168,7 @@ genSymTabFun n (M_fun (str,args_triple,otype,decls, stmts)) st  = (num2,tble2)
         (n',st2) = foldl (\(n',st3) x -> insert n' st3 x) (n,st1) args
         (num1,tble1) = processDecls n' scope st2 (sortDecls decls)
         (num3,tble3) = processStmtS num1 scope tble1 stmts --error("line 169: " ++ ppShow(tble1))--processStmtS num1 scope tble1 stmts
-        (num2,tble2) = error("line 170: " ++ppShow(tble3)) --removeScope num3 tble3
+        --(num2,tble2) = removeScope num3 tble3 --error("line 170: " ++ppShow(tble3)) --removeScope num3 tble3
         
 returnScope :: ST -> ScopeType
 returnScope st = case st of
@@ -178,7 +179,7 @@ removeScope n [] = (n, [])
 removeScope n (x:xs) = (n,xs)
 
 
---to get all the local vars sotryed
+--to get all the local vars sorted
 sortDecls :: [M_decl] -> [M_decl]
 sortDecls [] = []
 sortDecls (x:xs) = case x of

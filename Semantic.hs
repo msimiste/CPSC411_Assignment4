@@ -18,8 +18,8 @@ typeProg st (M_prog (decls,stmts)) = truthVal where
 checkDecls :: ST -> [M_decl] -> Bool
 checkDecls st [] = True
 checkDecls st (x:xs) = this && that where
-	this = (checkDecl st x)
-	that = (checkDecls st xs) --error("line 22: " ++ show(xs) ) 
+    this = (checkDecl st x)
+    that = (checkDecls st xs) --error("line 22: " ++ show(xs) ) 
 --checkDecls st decs = truthVal where
   --  truthVal = foldl(\truth x -> checkDecl st x) True decs
 
@@ -78,7 +78,7 @@ validateOperation st operate exprs = case operate of
         truth1 = case (S.look_up st str) of
             I_FUNCTION(_,_,list,_) -> case ((exprToType st exprs) == (convertParams list)) of
                 True -> True
-                False -> error("error in M_fn of validateOperation : " ++ show(exprToType st exprs)++ " not equal to \n"++show(convertParams list))-- error("line 71 : "++"\n exprs : "++ show(exprs)++"\n totype: " ++show(exprToType st exprs)++"\n list: "++ show(list) ++ "\n totype: "++show(convertParams list))		  
+                False -> error("error in M_fn of validateOperation : " ++ show(exprToType st exprs)++ " not equal to \n"++show(convertParams list))-- error("line 71 : "++"\n exprs : "++ show(exprs)++"\n totype: " ++show(exprToType st exprs)++"\n list: "++ show(list) ++ "\n totype: "++show(convertParams list))          
             x -> error("test: " )
     M_add -> case (foldl(\truth x -> x `elem` [M_int,M_real]) True (exprToType st exprs)) of
         True -> True
