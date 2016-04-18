@@ -21,7 +21,7 @@ main = do
             let astree = transProg tree
             let symbT = beginProcess astree
             let iRep = transProgIR astree
-            --putStrLn $ (ppShow) symbT
+            putStrLn $ (ppShow) symbT
             putStrLn $ (ppShow) astree
             putStrLn $ (ppShow) iRep
         Bad emgs -> putStrLn emgs

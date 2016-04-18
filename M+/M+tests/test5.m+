@@ -1,4 +1,6 @@
 var x:int;
+var w:int;
+var z:int;
 fun f(x:int,y:int):int
 {fun h(v:int):int
    { var r:int;
@@ -15,8 +17,7 @@ fun f(x:int,y:int):int
    print w+y; print w+x;
    return h(x*y);
  end};
-var w:int;
-var z:int;
+
 begin
   read x;
   read z;
