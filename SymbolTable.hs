@@ -52,14 +52,10 @@ processDecls n scope s (x:xs) = (n2,s1) where
 processDecl :: Int -> ST -> M_decl -> (Int, ST)
 processDecl n s x = case x of
     M_var (str,expr,i) -> insert n s (VARIABLE (str,i,(length expr)))
-    M_fun (str1,triple,typ1,dec,stm) -> genSymTabFun n' fun s' where --or (test1,s) ask prashant about this
-        --(test1,test2) = genSymTabFun n' fun s'
+    M_fun (str1,triple,typ1,dec,stm) -> genSymTabFun n' fun s' where 
         (n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
         fun = M_fun (str1,triple,typ1,dec,stm)
-    {-M_fun (str1,triple,typ1,dec,stm) -> (test1,s) where
-        (test1,test2) = genSymTabFun n' fun s'
-        (n',s') = insert n s (FUNCTION (str1,(map strip triple),typ1))
-        fun = M_fun (str1,triple,typ1,dec,stm) -}
+
         
 
 
@@ -168,7 +164,7 @@ genSymTabFun n (M_fun (str,args_triple,otype,decls, stmts)) st  = (num3,tble3)
         (n',st2) = foldl (\(n',st3) x -> insert n' st3 x) (n,st1) args
         (num1,tble1) = processDecls n' scope st2 (sortDecls decls)
         (num3,tble3) = processStmtS num1 scope tble1 stmts --error("line 169: " ++ ppShow(tble1))--processStmtS num1 scope tble1 stmts
-        --(num2,tble2) = removeScope num3 tble3 --error("line 170: " ++ppShow(tble3)) --removeScope num3 tble3
+        
         
 returnScope :: ST -> ScopeType
 returnScope st = case st of

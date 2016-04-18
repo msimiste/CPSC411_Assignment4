@@ -54,7 +54,7 @@ transMstmt st x = case x of
          expr = (convertMexpr st exp) -- some problem here??
          testing = case (look_up st str) of
             I_VARIABLE(lev,off,_,_) -> IASS(lev,off,expr)
-            x -> error("transMstmt: " ++ show(x))             
+            x -> error("MikeIRGen line: 57 transMstmt: " ++ show(x))             
     M_while (e,s) -> IWHILE(exp,stm) where
         exp = convertMexpr st e
         stm = transMstmt st s
