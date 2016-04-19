@@ -14,13 +14,7 @@ transProgIR (M_prog(mdec,mstmt)) = IPROG (fcnList, len , stmts) where
     st = S.beginProcess (M_prog(mdec,mstmt))
     fcnList = transMdecls st fcnList'
     stmts = transMstmts st mstmt
-   {- fcnList = case semanticResult of 
-        True -> transMdecls st fcnList'
-    stmts = case semanticResult of
-        True -> transMstmts st mstmt
-    semanticResult = case typeProg st (M_prog(mdec,mstmt)) of
-        True -> True            
-        False -> error ("Semantic Analysis Produced an Error")-}
+
     
     
     
@@ -29,6 +23,7 @@ transMdecls st [] = []
 transMdecls st (x:xs) = case x of
     M_fun x -> case (SEM.checkDecls st ((M_fun x):xs)) of
         True -> (transMdecl st (M_fun x)):(transMdecls st xs)
+        False -> error("error MikeIRGen transMdecls line 26: " ++ ppShow((xs)))
     x -> exp where -- to catch and show the error
         exp = error("error " ++ show(exp))
      
