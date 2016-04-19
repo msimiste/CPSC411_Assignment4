@@ -8,6 +8,49 @@ import Text.Show.Pretty
 
 --Starting function 
 typeProg :: ST -> AST -> Bool
+typeProg st (M_prog (decls,stmts)) = True
+
+checkDecls :: ST -> [M_decl] -> Bool
+checkDecls st x = True
+
+checkDecl :: ST -> M_decl -> Bool
+checkDecl st dec = True
+
+checkStmts :: ST -> [M_stmt] -> Bool
+checkStmts st x = True
+
+    
+checkStmt :: ST -> M_stmt -> Bool
+checkStmt st stmt = True
+
+checkExpr :: ST -> M_expr -> Bool
+checkExpr st exp = True
+
+validateOperation :: ST -> M_operation -> [M_expr] -> Bool
+validateOperation st operate exprs = True
+
+checkSameMexpr :: ST -> [M_expr] -> M_type -> Bool
+checkSameMexpr st x typ = True 
+
+
+checkMival :: M_expr -> Bool
+checkMival x = True
+
+checkMbval :: M_expr -> Bool
+checkMbval x = True
+
+checkMrval :: M_expr -> Bool
+checkMrval x = True
+
+
+compareLists :: [M_type] -> [M_type] -> Bool
+compareLists x y = True --error("line 168: " ++ppShow(b))--True
+
+
+compParams :: [(String,Int,M_type)] -> [(M_type,Int)] -> Bool
+compParams x  y = True
+{-
+typeProg :: ST -> AST -> Bool
 typeProg st (M_prog (decls,stmts)) = truthVal where
     truthVal = truth1 && truth2 --error("truth1 : "++show(truth1) ++ ("truth2 : ")++show(truth2)) truth1 && truth2
     truth1 = checkDecls st decls --error("showing decls :" ++ show(decls)) 
@@ -44,7 +87,8 @@ checkStmts st (x:xs) = (checkStmt st x) && (checkStmts st xs)
 
     
 checkStmt :: ST -> M_stmt -> Bool
-checkStmt st stmt = case stmt of
+validateOperation :: ST -> M_operation -> [M_expr] -> Bool
+validateOperation st operate exprs = case operate ofcheckStmt st stmt = case stmt of
     M_ass (str,expList,exp) -> truth1 where --error("reached line 41: "++show(stmt))
         truth1 = case (S.look_up st str) of
             I_VARIABLE(_,_,typ,_) ->  checkSameMexpr st (exp:expList) typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))--checkSameMexpr [exp] typ --error("reached line 44: " ++ show(checkSameMexpr [exp] typ))
@@ -83,7 +127,15 @@ validateOperation st operate exprs = case operate of
     M_fn str ->  case (foldl(\truth x -> checkExpr st x)True exprs) of
         True -> case(S.look_up st str) of
             I_FUNCTION(_,_,list,typ) -> case (foldl(\truth x -> x == typ)True (condenseList(exprToType st exprs))) of --error("line 84 : "++ppShow(S.look_up st str))
-				True -> True
+			compareLists :: [M_type] -> [M_type] -> Bool
+compareLists [] [] = True --error("line 168: " ++ppShow(b))--True
+compareLists  x [] = False
+compareLists  [] x = False
+compareLists  (x:xs) (y:ys) = error("line 171 : "++ppShow(x:xs== y:ys)++(ppShow(xs==ys))++ "\n x: "++ppShow(xs)++"\n y:"++ppShow(ys))--(x == y )&&(compareLists xs ys)--error("line 169: exprs: " ++ppShow((x:xs))++" params: "++ppShow(b))--( (x `elem` b) && (compareLists xs b)
+
+
+compParams :: [(String,Int,M_type)] -> [(M_type,Int)] -> Bool
+compParams [] [] = True	True -> True
 				False -> error("line 80: params: "++ ppShow((convertParams list)==(exprToType st exprs))++"\n :"++ppShow(operate)++"\n list: "++ppShow(list)++"\n exprs: "++ppShow(exprs)) -- error("error in M_fn of validateOperation : " ++ show(exprToType st exprs)++ " not equal to \n"++show( list))-- error("line 71 : "++"\n exprs : "++ show(exprs)++"\n totype: " ++show(exprToType st exprs)++"\n list: "++ show(list) ++ "\n totype: "++show(convertParams list))  x -> error("test: " )
             _ -> error("test: ")
         False -> error("line 84 :")
@@ -115,11 +167,32 @@ validateOperation st operate exprs = case operate of
         True -> True
         False -> error ("error in M_ge of validateOperation : " ++ show(exprs))
     M_eq -> case (foldl(\truth x -> x `elem` [M_int,M_real]) True (exprToType st exprs)) of
-        True -> True
+        True -> checkMival :: M_expr -> Bool
+checkMival x = case x of
+    M_ival x -> True
+    _ -> False
+
+checkMbval :: M_expr -> Bool
+checkMbval x = case x of
+    M_bval x -> True
+    _ -> False
+
+checkMrval :: M_expr -> Bool
+checkMrval x = case x of
+    M_rval x -> True
+    _ -> FalseTrue
         False -> error ("error in M_eq of validateOperation : " ++ show(exprs))
     M_not -> case (foldl(\truth x -> x == M_bool) True (exprToType st exprs)) of
         True -> True
-        False -> error ("error in M_not of validateOperation : " ++ show(exprs))
+        FacompareLists :: [M_type] -> [M_type] -> Bool
+compareLists [] [] = True --error("line 168: " ++ppShow(b))--True
+compareLists  x [] = False
+compareLists  [] x = False
+compareLists  (x:xs) (y:ys) = error("line 171 : "++ppShow(x:xs== y:ys)++(ppShow(xs==ys))++ "\n x: "++ppShow(xs)++"\n y:"++ppShow(ys))--(x == y )&&(compareLists xs ys)--error("line 169: exprs: " ++ppShow((x:xs))++" params: "++ppShow(b))--( (x `elem` b) && (compareLists xs b)
+
+
+compParams :: [(String,Int,M_type)] -> [(M_type,Int)] -> Bool
+compParams [] [] = Truelse -> error ("error in M_not of validateOperation : " ++ show(exprs))
     M_and -> case (foldl(\truth x -> x == M_bool) True (exprToType st exprs)) of
         True -> True
         False -> error ("error in M_and of validateOperation : " ++ show(exprs))
@@ -177,7 +250,15 @@ checkMbval x = case x of
     _ -> False
 
 checkMrval :: M_expr -> Bool
-checkMrval x = case x of
+checkMrcompareLists :: [M_type] -> [M_type] -> Bool
+compareLists [] [] = True --error("line 168: " ++ppShow(b))--True
+compareLists  x [] = False
+compareLists  [] x = False
+compareLists  (x:xs) (y:ys) = error("line 171 : "++ppShow(x:xs== y:ys)++(ppShow(xs==ys))++ "\n x: "++ppShow(xs)++"\n y:"++ppShow(ys))--(x == y )&&(compareLists xs ys)--error("line 169: exprs: " ++ppShow((x:xs))++" params: "++ppShow(b))--( (x `elem` b) && (compareLists xs b)
+
+
+compParams :: [(String,Int,M_type)] -> [(M_type,Int)] -> Bool
+compParams [] [] = Trueval x = case x of
     M_rval x -> True
     _ -> False
 
@@ -193,3 +274,4 @@ compParams [] [] = True
 compParams _ [] = False
 compParams [] _ = False
 compParams  ((_,num1,typ1):ls1) ((typ2,num2):ls2) = (num1 == num2) && (typ1 == typ2) && (compParams ls1 ls2)
+-}

@@ -1,16 +1,17 @@
 module MikeIRGen where
 
 import AST
-import SymbolTable as S
+import qualified SymbolTable as S
 import IRDataType
 import ST
-import Semantic as SEM
+import qualified Semantic as SEM
+import Text.Show.Pretty
 
 transProgIR :: AST -> I_prog
 transProgIR (M_prog(mdec,mstmt)) = IPROG (fcnList, len , stmts) where
     fcnList' = (filter(\x -> not (isVar x))) mdec
     len = length (filter isVar(mdec))
-    st = beginProcess (M_prog(mdec,mstmt))
+    st = S.beginProcess (M_prog(mdec,mstmt))
     fcnList = transMdecls st fcnList'
     stmts = transMstmts st mstmt
    {- fcnList = case semanticResult of 
@@ -32,12 +33,12 @@ transMdecls st (x:xs) = case x of
         exp = error("error " ++ show(exp))
      
 transMdecl :: ST -> M_decl -> I_fbody
-transMdecl st (M_fun(name,triple,rTyp,dec,stm)) = IFUN(name,iFcns,numVars,numArgs,stmts) where
+transMdecl st (M_fun(name,triple,rTyp,dec,stm)) = IFUN(name,iFcns,numVars,numArgs,stmts) where --error("line 34: ifcns' : " ++ ppShow(iFcns')++"\n iFcns : "++ppShow(iFcns)) 
         numArgs = (length(filter(\(s,n,t) -> n < 0) triple))
         numVars = (length triple) - numArgs
         iFcns' = (filter(\x -> not (isVar x))) dec
         iFcns = map(\x -> convertMfun st x) iFcns'
-        stmts = case checkStmts st stm of
+        stmts = case SEM.checkStmts st stm of
             True -> transMstmts st stm
             False -> error("irgen line 41: ")
 transMstmts :: ST -> [M_stmt] -> [I_stmt]
@@ -52,7 +53,7 @@ transMstmt :: ST -> M_stmt -> I_stmt
 transMstmt st x = case x of
     M_ass (str,expList,exp) -> testing where
          expr = (convertMexpr st exp) -- some problem here??
-         testing = case (look_up st str) of
+         testing = case (S.look_up st str) of
             I_VARIABLE(lev,off,_,_) -> IASS(lev,off,expr)
             x -> error("MikeIRGen line: 57 transMstmt: " ++ show(x))             
     M_while (e,s) -> IWHILE(exp,stm) where
@@ -118,13 +119,15 @@ isVar m = case m of
     M_var m -> True
     _ -> False
     
-convertMfun :: ST -> M_decl -> I_fbody 
+convertMfun :: ST -> M_decl -> I_fbody
 convertMfun st (M_fun (name,triple,typ,decls,stmts)) = IFUN (name,fcnList,locV,locA,istmts) where
     Symbol_table(_,locV,locA,_) = (st !! lev) where
         I_FUNCTION(lev,_,_,_) = S.look_up st name
     fcnList = case (SEM.checkDecls st decls) of
-        True -> transMdecls st decls
-        False -> error("IrGen line 125: ")
+        True ->transMdecls st decls' where
+			decls' =  (filter(\x -> not (isVar x))) decls-- error("line 130: "++ppShow((M_fun (name,triple,typ,decls,stmts))))--transMdecls st decls
+        False -> error("IrGen line 127: ")
     istmts = case (SEM.checkStmts st stmts) of
         True -> transMstmts st stmts
-        False -> error("irGen line 128: ")
+        False -> error("irGen line 130")
+
