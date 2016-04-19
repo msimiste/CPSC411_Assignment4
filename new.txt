@@ -1,0 +1,12 @@
+AbsAssign.hs
+AST.hs
+ErrM.hs
+IRDataType.hs
+LexAssign.hs
+Mainfile.hs
+MikeIRGen.hs
+ParAssign.hs
+Semantic.hs
+SkelAssign.hs
+ST.hs
+SymbolTable.hs

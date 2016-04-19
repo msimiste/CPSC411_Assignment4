@@ -155,7 +155,7 @@ checkSameMexpr :: ST -> [M_expr] -> M_type -> Bool
 checkSameMexpr st [] typ = True --error("checkSameMexpr line 101 : "++show(typ))
 checkSameMexpr st exp typ = case (foldl(\truth x -> x == typ) True (exprToType st exp)) of
     True -> True
-    False -> error("error in M_int of checkSameMexpr: \n" ++ show(exprToType st exp) ++ "\n "++show(typ) ++" are not equal")
+    False -> error("error in M_int of checkSameMexpr: \n" ++ show(exprToType st exp) ++ "\n "++show(typ) ++" are not equal\n"++ ppShow (st))
 
 checkMival :: M_expr -> Bool
 checkMival x = case x of
